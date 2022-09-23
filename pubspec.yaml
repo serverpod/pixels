@@ -1,0 +1,19 @@
+name: pixels
+description: Minimalistic pixel editor for Flutter.
+version: 1.0.0
+homepage:
+
+environment:
+  sdk: '>=2.18.1 <3.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
