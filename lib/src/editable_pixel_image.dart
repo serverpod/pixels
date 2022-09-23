@@ -157,17 +157,31 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
 
   set pixels(ByteData pixels) {
     assert(pixels.lengthInBytes == width * height);
+    _pixelBytes = pixels.buffer.asUint8List();
     _update();
   }
 
-  /// Sets a specific pixel in teh [EditablePixelImage] controlled by the
+  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
   /// controller.
   void setPixel({
-    required int pixel,
+    required int colorIndex,
     required int x,
     required int y,
   }) {
-    _pixelBytes[y * width + x] = pixel;
+    setPixelIndex(
+      pixelIndex: y * width + x,
+      colorIndex: colorIndex,
+    );
+    _update();
+  }
+
+  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
+  /// controller.
+  void setPixelIndex({
+    required pixelIndex,
+    required colorIndex,
+  }) {
+    _pixelBytes[pixelIndex] = colorIndex;
     _update();
   }
 

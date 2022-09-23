@@ -45,7 +45,7 @@ class _PixelEditorState extends State<PixelEditor> {
             controller: widget.controller,
             onTappedPixel: (details) {
               widget.controller.setPixel(
-                pixel: _selectedColor,
+                colorIndex: _selectedColor,
                 x: details.x,
                 y: details.y,
               );

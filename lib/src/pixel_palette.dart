@@ -32,10 +32,10 @@ class PixelPalette {
   /// A [PixelPalette] with the colors used by r/place.
   const PixelPalette.rPlace()
       : colors = const [
-          Color(0xFFFFFFFF),
-          Color(0xFFE4E4E4),
-          Color(0xFF888888),
           Color(0xFF222222),
+          Color(0xFF888888),
+          Color(0xFFE4E4E4),
+          Color(0xFFFFFFFF),
           Color(0xFFFFA7D1),
           Color(0xFFE50000),
           Color(0xFFE59500),
