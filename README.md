@@ -3,6 +3,7 @@
 Pixels is a minimalistic pixel editor for Flutter. It also comes with a couple
 of handy widgets for displaying and manipulating pixel images.
 
+![Pixels screenshot](https://github.com/serverpod/pixels/raw/main/screenshot.png)
 
 ## Usage
 
