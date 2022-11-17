@@ -53,7 +53,7 @@ class _PixelImageState extends State<PixelImage> {
     var srcPixels = widget.pixels.buffer.asUint8List();
 
     // Iterate over all pixels.
-    for (var i = 0; i < widget.area; i++) {
+    for (int i = 0; i < widget.area; i++) {
       var color = widget.palette?.colors[srcPixels[i]] ??
           Color.fromARGB(srcPixels[i * 4 + 3], srcPixels[i * 4 + 0],
               srcPixels[i * 4 + 1], srcPixels[i * 4 + 2]);

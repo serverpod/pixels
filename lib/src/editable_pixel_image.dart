@@ -44,25 +44,11 @@ class _EditablePixelImageState extends State<EditablePixelImage> {
     return AspectRatio(
       aspectRatio: widget.controller.width / widget.controller.height,
       child: LayoutBuilder(builder: (context, constraints) {
+        final tapHandler = makeTapHandler(constraints);
+
         return GestureDetector(
-          onTapDown: (details) {
-            var xLocal = details.localPosition.dx;
-            var yLocal = details.localPosition.dy;
-
-            var x = widget.controller.width * xLocal ~/ constraints.maxWidth;
-            var y = widget.controller.height * yLocal ~/ constraints.maxHeight;
-
-            if (widget.onTappedPixel != null) {
-              widget.onTappedPixel!(
-                PixelTapDetails._(
-                  x: x,
-                  y: y,
-                  index: y * widget.controller.width + x,
-                  localPosition: details.localPosition,
-                ),
-              );
-            }
-          },
+          onTapDown: tapHandler,
+          onPanUpdate: tapHandler,
           child: PixelImage(
             width: widget.controller.value.width,
             height: widget.controller.value.height,
@@ -72,6 +58,27 @@ class _EditablePixelImageState extends State<EditablePixelImage> {
         );
       }),
     );
+  }
+
+  void Function(dynamic) makeTapHandler(constraints) {
+    return (details) {
+      var xLocal = details.localPosition.dx;
+      var yLocal = details.localPosition.dy;
+
+      var x = widget.controller.width * xLocal ~/ constraints.maxWidth;
+      var y = widget.controller.height * yLocal ~/ constraints.maxHeight;
+
+      if (widget.onTappedPixel != null) {
+        widget.onTappedPixel!(
+          PixelTapDetails._(
+            x: x,
+            y: y,
+            index: y * widget.controller.width + x,
+            localPosition: details.localPosition,
+          ),
+        );
+      }
+    };
   }
 }
 
@@ -133,11 +140,12 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
   PixelImageController({
     ByteData? pixels,
     this.palette,
+    Color? bgColor,
     required this.width,
     required this.height,
     this.onTappedPixel,
   }) : super(_PixelImageValue(
-          pixels: pixels ?? _emptyPixels(),
+          pixels: pixels ?? _emptyPixels(width, height, bgColor),
           palette: palette,
           width: width,
           height: height,
@@ -146,8 +154,18 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
     assert(_pixelBytes.length == area * 4);
   }
 
-  static ByteData _emptyPixels() {
-    var bytes = Uint8List(64 * 64 * 4);
+  static ByteData _emptyPixels(int width, int height, Color? fill) {
+    final area = width * height;
+    var bytes = Uint8List(area * 4);
+
+    if (fill != null) {
+      for (int i = 0; i < area; i++) {
+        bytes[i * 4 + 0] = fill.red;
+        bytes[i * 4 + 1] = fill.green;
+        bytes[i * 4 + 2] = fill.blue;
+        bytes[i * 4 + 3] = fill.alpha;
+      }
+    }
     return bytes.buffer.asByteData();
   }
 

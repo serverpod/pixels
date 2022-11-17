@@ -76,14 +76,7 @@ class _GradientColorPickerWell extends StatelessWidget {
     }
 
     return GestureDetector(
-        onTapDown: (details) {
-          final RenderBox renderBox =
-              colorGradKey.currentContext?.findRenderObject() as RenderBox;
-          final size = renderBox.size;
-          final double x = details.localPosition.dx / size.width;
-          final double y = details.localPosition.dy / size.height;
-          onTap(x, y);
-        },
+        onTapDown: handleTapDown,
         child: Container(
           key: colorGradKey,
           decoration: BoxDecoration(
@@ -94,5 +87,14 @@ class _GradientColorPickerWell extends StatelessWidget {
             colors: colors,
           )),
         ));
+  }
+
+  void handleTapDown(details) {
+    final RenderBox renderBox =
+        colorGradKey.currentContext?.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final double x = details.localPosition.dx / size.width;
+    final double y = details.localPosition.dy / size.height;
+    onTap(x, y);
   }
 }
