@@ -99,13 +99,13 @@ class PixelTapDetails {
 
 class _PixelImageValue {
   final ByteData pixels;
-  final PixelPalette palette;
+  final PixelPalette? palette;
   final int width;
   final int height;
 
   const _PixelImageValue({
     required this.pixels,
-    required this.palette,
+    this.palette,
     required this.width,
     required this.height,
   });
@@ -117,7 +117,7 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
   late Uint8List _pixelBytes;
 
   /// The palette of the [EditablePixelImage] controlled by the controller.
-  final PixelPalette palette;
+  final PixelPalette? palette;
 
   /// Height in pixels of the [EditablePixelImage] controlled by the controller.
   final int height;
@@ -132,7 +132,7 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
   /// Creates a new [PixelImageController].
   PixelImageController({
     ByteData? pixels,
-    required this.palette,
+    this.palette,
     required this.width,
     required this.height,
     this.onTappedPixel,
@@ -143,11 +143,11 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
           height: height,
         )) {
     _pixelBytes = value.pixels.buffer.asUint8List();
-    assert(_pixelBytes.length == width * height);
+    assert(_pixelBytes.length == area * 4);
   }
 
   static ByteData _emptyPixels() {
-    var bytes = Uint8List(64 * 64);
+    var bytes = Uint8List(64 * 64 * 4);
     return bytes.buffer.asByteData();
   }
 
@@ -155,8 +155,11 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
   /// controller.
   ByteData get pixels => _pixelBytes.buffer.asByteData();
 
+  /// calculate the image's 2D area
+  int get area => width * height;
+
   set pixels(ByteData pixels) {
-    assert(pixels.lengthInBytes == width * height);
+    assert(pixels.lengthInBytes == area * 4);
     _pixelBytes = pixels.buffer.asUint8List();
     _update();
   }
@@ -168,6 +171,7 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
     required int x,
     required int y,
   }) {
+    if (palette == null) return;
     setPixelIndex(
       pixelIndex: y * width + x,
       colorIndex: colorIndex,
@@ -181,7 +185,37 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
     required pixelIndex,
     required colorIndex,
   }) {
+    if (palette == null) return;
     _pixelBytes[pixelIndex] = colorIndex;
+    _update();
+  }
+
+  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
+  /// controller.
+  void setPixelColor({
+    required Color color,
+    required int x,
+    required int y,
+  }) {
+    if (palette != null) return;
+    setPixelIndexColor(
+      pixelIndex: y * width + x,
+      color: color,
+    );
+    _update();
+  }
+
+  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
+  /// controller.
+  void setPixelIndexColor({
+    required pixelIndex,
+    required color,
+  }) {
+    if (palette != null) return;
+    _pixelBytes[pixelIndex * 4 + 0] = color.red;
+    _pixelBytes[pixelIndex * 4 + 1] = color.green;
+    _pixelBytes[pixelIndex * 4 + 2] = color.blue;
+    _pixelBytes[pixelIndex * 4 + 3] = color.alpha;
     _update();
   }
 

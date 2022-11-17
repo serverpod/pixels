@@ -3,7 +3,7 @@ import 'package:pixels/src/pixel_palette.dart';
 
 /// A [PixelPalette] color picker. It can be displayed vertically or
 /// horizontally depending on the [direction].
-class PixelColorPicker extends StatelessWidget {
+class PaletteColorPicker extends StatelessWidget {
   /// The palette used by the color picker.
   final PixelPalette palette;
 
@@ -20,8 +20,8 @@ class PixelColorPicker extends StatelessWidget {
   /// The width or height (depending on it's direction) of the color picker.
   final double crossAxisWidth;
 
-  /// Creates a new [PixelColorPicker].
-  const PixelColorPicker({
+  /// Creates a new [PaletteColorPicker].
+  const PaletteColorPicker({
     required this.selectedIndex,
     required this.onChanged,
     required this.palette,
@@ -42,7 +42,7 @@ class PixelColorPicker extends StatelessWidget {
           for (var i = 0; i < palette.colors.length; i++)
             Expanded(
               flex: 1,
-              child: _PixelColorPickerWell(
+              child: _PalleteColorPickerWell(
                 index: i,
                 palette: palette,
                 selected: selectedIndex == i,
@@ -57,13 +57,13 @@ class PixelColorPicker extends StatelessWidget {
   }
 }
 
-class _PixelColorPickerWell extends StatelessWidget {
+class _PalleteColorPickerWell extends StatelessWidget {
   final int index;
   final PixelPalette palette;
   final bool selected;
   final VoidCallback onTap;
 
-  const _PixelColorPickerWell({
+  const _PalleteColorPickerWell({
     required this.index,
     required this.palette,
     required this.selected,
