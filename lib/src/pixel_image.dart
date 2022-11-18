@@ -48,28 +48,8 @@ class _PixelImageState extends State<PixelImage> {
   Future<void> _updateUIImage() async {
     assert(widget.pixels.lengthInBytes == widget.area * 4);
 
-    var dstImageBytes = Uint8List(widget.area * 4);
-
-    var srcPixels = widget.pixels.buffer.asUint8List();
-
-    // Iterate over all pixels.
-    for (int i = 0; i < widget.area; i++) {
-      var color = widget.palette?.colors[srcPixels[i]] ??
-          Color.fromARGB(srcPixels[i * 4 + 3], srcPixels[i * 4 + 0],
-              srcPixels[i * 4 + 1], srcPixels[i * 4 + 2]);
-
-      var r = color.red;
-      var g = color.green;
-      var b = color.blue;
-      var a = color.alpha;
-
-      dstImageBytes[i * 4 + 0] = r;
-      dstImageBytes[i * 4 + 1] = g;
-      dstImageBytes[i * 4 + 2] = b;
-      dstImageBytes[i * 4 + 3] = a;
-    }
-
-    var immutableBuffer = await ui.ImmutableBuffer.fromUint8List(dstImageBytes);
+    var immutableBuffer = await ui.ImmutableBuffer.fromUint8List(
+        widget.pixels.buffer.asUint8List());
     var imageDescriptor = ui.ImageDescriptor.raw(
       immutableBuffer,
       width: widget.width,

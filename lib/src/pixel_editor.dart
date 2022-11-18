@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pixels/src/editable_pixel_image.dart';
 import 'package:pixels/src/pallete_color_picker.dart';
@@ -29,19 +30,37 @@ class PixelEditor extends StatefulWidget {
 
 class _PixelEditorState extends State<PixelEditor> {
   int _selectedColorIndex = 0;
-  Color _selectedColor = const Color.fromARGB(255, 255, 255, 255);
-  Color _finalColor = const Color.fromARGB(255, 255, 255, 255);
-  double _selectedSaturation = 1.0;
+  late Color _selectedColor;
+  late Color _finalColor;
+  double _selectedSaturation = 0.5;
 
+  /// Mixes [colorIn] by saturation `S`
+  /// S < 0.5 will darken, S > 0.5 will brighten
   Color saturate(Color colorIn) {
-    int r = (colorIn.red * _selectedSaturation).floor();
-    int g = (colorIn.green * _selectedSaturation).floor();
-    int b = (colorIn.blue * _selectedSaturation).floor();
-    return Color.fromARGB(colorIn.alpha, r, g, b);
+    final double r = colorIn.red.toDouble();
+    final double g = colorIn.green.toDouble();
+    final double b = colorIn.blue.toDouble();
+    final double S = 255 * (_selectedSaturation * 2 - 1);
+    final ri = clampDouble(r + S, 0, 255).toInt();
+    final gi = clampDouble(g + S, 0, 255).toInt();
+    final bi = clampDouble(b + S, 0, 255).toInt();
+
+    return Color.fromARGB(colorIn.alpha, ri, gi, bi);
+  }
+
+  /// Given some delta [a] 0.0-1.0, sample a color from the primary color spectrum
+  Color sampleRainbowColor(double a) {
+    const pi2 = pi * 2.0;
+    double r = ((sin(a * pi2 + 2) + 1) / 2) * 255;
+    double g = ((sin(a * pi2 + 0) + 1) / 2) * 255;
+    double b = ((sin(a * pi2 + 4) + 1) / 2) * 255;
+    return Color.fromARGB(255, r.floor(), g.floor(), b.floor());
   }
 
   @override
   void initState() {
+    _selectedColor = _finalColor = sampleRainbowColor(1.0);
+
     super.initState();
   }
 
@@ -77,7 +96,7 @@ class _PixelEditorState extends State<PixelEditor> {
       onChanged: (index) {
         setState(() {
           _selectedColorIndex = index;
-          _selectedColor =
+          _finalColor = _selectedColor =
               widget.controller.palette!.colors[_selectedColorIndex];
         });
       },
@@ -87,19 +106,14 @@ class _PixelEditorState extends State<PixelEditor> {
   // uses a linear equation to cycle through the rainbow
   Widget makeRainbowGradientPicker(bool isHorizontal) {
     return GradientColorPicker(
-      equation: (y) {
-        const pi2 = pi * 2.0;
-        double r = ((sin(y * pi2 + 2) + 1) / 2) * 255;
-        double g = ((sin(y * pi2 + 0) + 1) / 2) * 255;
-        double b = ((sin(y * pi2 + 4) + 1) / 2) * 255;
-        return Color.fromARGB(255, r.floor(), g.floor(), b.floor());
-      },
-      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+      equation: sampleRainbowColor,
       onSelected: (color) {
         setState(() {
           _finalColor = saturate(_selectedColor = color);
         });
       },
+      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+      sliderStartOffset: 1.0,
     );
   }
 
@@ -110,7 +124,6 @@ class _PixelEditorState extends State<PixelEditor> {
         int r = (y * 255).floor();
         return Color.fromARGB(255, r, r, r);
       },
-      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
       onSelected: (color) {
         setState(() {
           // convert to [0.0, 1.0] range for 0-100% intensity
@@ -119,6 +132,9 @@ class _PixelEditorState extends State<PixelEditor> {
           _finalColor = saturate(_selectedColor);
         });
       },
+      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+      sliderColor: Colors.yellow,
+      sliderStartOffset: _selectedSaturation,
     );
   }
 
@@ -132,7 +148,7 @@ class _PixelEditorState extends State<PixelEditor> {
   }
 
   void handleColorTap(details) {
-    widget.controller.setPixelColor(
+    widget.controller.setPixel(
       color: _finalColor,
       x: details.x,
       y: details.y,
@@ -148,8 +164,9 @@ class _PixelEditorState extends State<PixelEditor> {
   }
 
   void handlePaletteColorTap(details) {
+    final Color color = widget.controller.palette!.colors[_selectedColorIndex];
     widget.controller.setPixel(
-      colorIndex: _selectedColorIndex,
+      color: color,
       x: details.x,
       y: details.y,
     );
@@ -158,7 +175,7 @@ class _PixelEditorState extends State<PixelEditor> {
         SetPixelDetails._(
           tapDetails: details,
           colorIndex: _selectedColorIndex,
-          colorValue: widget.controller.palette!.colors[_selectedColorIndex],
+          colorValue: color,
         ),
       );
     }

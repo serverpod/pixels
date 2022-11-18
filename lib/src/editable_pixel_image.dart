@@ -185,38 +185,11 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
   /// Sets a specific pixel in the [EditablePixelImage] controlled by the
   /// controller.
   void setPixel({
-    required int colorIndex,
-    required int x,
-    required int y,
-  }) {
-    if (palette == null) return;
-    setPixelIndex(
-      pixelIndex: y * width + x,
-      colorIndex: colorIndex,
-    );
-    _update();
-  }
-
-  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
-  /// controller.
-  void setPixelIndex({
-    required pixelIndex,
-    required colorIndex,
-  }) {
-    if (palette == null) return;
-    _pixelBytes[pixelIndex] = colorIndex;
-    _update();
-  }
-
-  /// Sets a specific pixel in the [EditablePixelImage] controlled by the
-  /// controller.
-  void setPixelColor({
     required Color color,
     required int x,
     required int y,
   }) {
-    if (palette != null) return;
-    setPixelIndexColor(
+    setPixelIndex(
       pixelIndex: y * width + x,
       color: color,
     );
@@ -225,11 +198,10 @@ class PixelImageController extends ValueNotifier<_PixelImageValue> {
 
   /// Sets a specific pixel in the [EditablePixelImage] controlled by the
   /// controller.
-  void setPixelIndexColor({
+  void setPixelIndex({
     required pixelIndex,
     required color,
   }) {
-    if (palette != null) return;
     _pixelBytes[pixelIndex * 4 + 0] = color.red;
     _pixelBytes[pixelIndex * 4 + 1] = color.green;
     _pixelBytes[pixelIndex * 4 + 2] = color.blue;
