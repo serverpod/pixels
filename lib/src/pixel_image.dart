@@ -14,7 +14,7 @@ class PixelImage extends StatefulWidget {
   final int height;
 
   /// The palette used by this image.
-  final PixelPalette palette;
+  final PixelPalette? palette;
 
   /// The [ByteData] representing the pixels in the image. Each byte corresponds
   /// to one pixel.
@@ -24,13 +24,16 @@ class PixelImage extends StatefulWidget {
   const PixelImage({
     required this.width,
     required this.height,
-    required this.palette,
+    this.palette,
     required this.pixels,
     super.key,
   });
 
   @override
   State<PixelImage> createState() => _PixelImageState();
+
+  /// calculate the image's 2D area
+  int get area => width * height;
 }
 
 class _PixelImageState extends State<PixelImage> {
@@ -43,27 +46,10 @@ class _PixelImageState extends State<PixelImage> {
   }
 
   Future<void> _updateUIImage() async {
-    assert(widget.pixels.lengthInBytes == widget.width * widget.height);
+    assert(widget.pixels.lengthInBytes == widget.area * 4);
 
-    var dstImageBytes = Uint8List(widget.width * widget.height * 4);
-
-    var srcPixels = widget.pixels.buffer.asUint8List();
-
-    // Iterate over all pixels.
-    for (var i = 0; i < widget.width * widget.height; i++) {
-      var color = widget.palette.colors[srcPixels[i]];
-      var r = color.red;
-      var g = color.green;
-      var b = color.blue;
-      var a = color.alpha;
-
-      dstImageBytes[i * 4 + 0] = r;
-      dstImageBytes[i * 4 + 1] = g;
-      dstImageBytes[i * 4 + 2] = b;
-      dstImageBytes[i * 4 + 3] = a;
-    }
-
-    var immutableBuffer = await ui.ImmutableBuffer.fromUint8List(dstImageBytes);
+    var immutableBuffer = await ui.ImmutableBuffer.fromUint8List(
+        widget.pixels.buffer.asUint8List());
     var imageDescriptor = ui.ImageDescriptor.raw(
       immutableBuffer,
       width: widget.width,
