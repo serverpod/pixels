@@ -32,18 +32,18 @@ class _PixelEditorState extends State<PixelEditor> {
   int _selectedColorIndex = 0;
   late Color _selectedColor;
   late Color _finalColor;
-  double _selectedSaturation = 0.5;
+  double _selectedLuminosity = 0.5;
 
-  /// Mixes [colorIn] by saturation `S`
-  /// S < 0.5 will darken, S > 0.5 will brighten
-  Color saturate(Color colorIn) {
+  /// Mixes [colorIn] by luminosity `L`
+  /// L < 0.5 will darken, S > 0.5 will brighten
+  Color luminate(Color colorIn) {
     final double r = colorIn.red.toDouble();
     final double g = colorIn.green.toDouble();
     final double b = colorIn.blue.toDouble();
-    final double S = 255 * (_selectedSaturation * 2 - 1);
-    final ri = clampDouble(r + S, 0, 255).toInt();
-    final gi = clampDouble(g + S, 0, 255).toInt();
-    final bi = clampDouble(b + S, 0, 255).toInt();
+    final double L = 255 * (_selectedLuminosity * 2 - 1);
+    final ri = clampDouble(r + L, 0, 255).toInt();
+    final gi = clampDouble(g + L, 0, 255).toInt();
+    final bi = clampDouble(b + L, 0, 255).toInt();
 
     return Color.fromARGB(colorIn.alpha, ri, gi, bi);
   }
@@ -80,7 +80,7 @@ class _PixelEditorState extends State<PixelEditor> {
             if (widget.controller.palette != null) ...[
               makePaletteColorPicker(isHorizontal),
             ] else ...[
-              makeSaturationGradientPicker(isHorizontal),
+              makeLumenGradientPicker(isHorizontal),
               makeRainbowGradientPicker(isHorizontal),
             ],
           ]);
@@ -109,7 +109,7 @@ class _PixelEditorState extends State<PixelEditor> {
       equation: sampleRainbowColor,
       onSelected: (color) {
         setState(() {
-          _finalColor = saturate(_selectedColor = color);
+          _finalColor = luminate(_selectedColor = color);
         });
       },
       direction: isHorizontal ? Axis.vertical : Axis.horizontal,
@@ -118,7 +118,7 @@ class _PixelEditorState extends State<PixelEditor> {
   }
 
 // uses a linear equation from black to white
-  Widget makeSaturationGradientPicker(bool isHorizontal) {
+  Widget makeLumenGradientPicker(bool isHorizontal) {
     return GradientColorPicker(
       equation: (y) {
         int r = (y * 255).floor();
@@ -127,14 +127,14 @@ class _PixelEditorState extends State<PixelEditor> {
       onSelected: (color) {
         setState(() {
           // convert to [0.0, 1.0] range for 0-100% intensity
-          _selectedSaturation = color.red / 255;
+          _selectedLuminosity = color.red / 255;
           // mix
-          _finalColor = saturate(_selectedColor);
+          _finalColor = luminate(_selectedColor);
         });
       },
       direction: isHorizontal ? Axis.vertical : Axis.horizontal,
       sliderColor: Colors.yellow,
-      sliderStartOffset: _selectedSaturation,
+      sliderStartOffset: _selectedLuminosity,
     );
   }
 
